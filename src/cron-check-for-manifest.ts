@@ -25,10 +25,19 @@ async function run () {
 
   const current = manifestMetadata.Response.version;
 
-  if (!skipCheck) {
-    writeNewManifestVersion(latest, current)
+  if (skipCheck) {
+    console.log(`Skipping check - new manifest is ${current}`);
+    return
   }
+  console.log(`Latest:  ${latest}`);
+  console.log(`Current: ${current}`);
+  const isNewManifest = latest !== current;
+  if (!isNewManifest) {
+    return;
+  }
+  console.log('New manifest detected');
 
+  writeNewManifestVersion(current)
   const { error } = await deployWebsite(current);
 
   if (error) {
@@ -38,16 +47,8 @@ async function run () {
   }
 }
 
-function writeNewManifestVersion (latest: string, current: string) {
+function writeNewManifestVersion (current: string) {
   const newREADME = `# d2-manifest-bot\ngithub action for checking for new d2 manifest\n\n# Current Manifest: ${current}`;
-  console.log(`Latest:  ${latest}`);
-  console.log(`Current: ${current}`);
-  const isNewManifest = latest !== current;
-  if (!isNewManifest) {
-    return;
-  }
-  console.log('New manifest detected');
-
   writeFileSync('latest.json', `${JSON.stringify(current, null, 2)}\n`, 'utf8');
   writeFileSync('README.md', newREADME, 'utf8');
 }
