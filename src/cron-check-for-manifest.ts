@@ -61,6 +61,7 @@ function deployWebsite (current: string) {
     query: {
       trigger_title: buildMessage,
     },
+    body: 'SKIP',
     method: 'POST',
   };
   return $fetch(buildOptions.url, buildOptions);
