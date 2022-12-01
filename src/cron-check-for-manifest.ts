@@ -2,7 +2,7 @@
 
 import { getDestinyManifest, HttpClientConfig } from 'bungie-api-ts/destiny2';
 import latest from '../latest.json' assert { type: 'json' };
-import { writeFileSync } from 'fs-extra';
+import { writeFileSync } from 'fs';
 import { $fetch } from 'ofetch';
 
 
