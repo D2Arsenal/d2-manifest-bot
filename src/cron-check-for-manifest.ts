@@ -3,7 +3,7 @@
 import { getDestinyManifest, HttpClientConfig } from 'bungie-api-ts/destiny2';
 import latest from '../latest.json' assert { type: 'json' };
 import { writeFileSync } from 'fs';
-import { $fetch } from 'ofetch';
+import { $fetch, FetchOptions } from 'ofetch';
 
 
 const $http = async (config: HttpClientConfig) => $fetch(config.url, {
@@ -56,13 +56,15 @@ function writeNewManifestVersion (current: string) {
 function deployWebsite (current: string) {
   const buildMessage = `New manifest build - ${current}`;
 
-  const buildOptions = {
-    url: process.env.NETLIFY_HOOK_URL!,
+  const url = process.env.NETLIFY_HOOK_URL
+  if (!url) {
+    throw new Error('NETLIFY_HOOK_URL is not set');
+  }
+  return $fetch(url, {
     query: {
       trigger_title: buildMessage,
     },
     body: 'SKIP',
     method: 'POST',
-  };
-  return $fetch(buildOptions.url, buildOptions);
+  });
 }
