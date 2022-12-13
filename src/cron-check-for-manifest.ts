@@ -3,7 +3,7 @@
 import { getDestinyManifest, HttpClientConfig } from 'bungie-api-ts/destiny2';
 import latest from '../latest.json' assert { type: 'json' };
 import { writeFileSync } from 'fs';
-import { $fetch, FetchOptions } from 'ofetch';
+import { $fetch } from 'ofetch';
 
 
 const $http = async (config: HttpClientConfig) => $fetch(config.url, {
@@ -20,7 +20,7 @@ run().catch((e) => {
   process.exit(1);
 });
 
-async function run () {
+async function run() {
   const manifestMetadata = await getDestinyManifest($http);
 
   const current = manifestMetadata.Response.version;
@@ -38,22 +38,22 @@ async function run () {
   console.log('New manifest detected');
 
   writeNewManifestVersion(current)
-  const { error } = await deployWebsite(current);
-
-  if (error) {
-    console.log('Github returned an error');
+  try {
+    await deployWebsite(current);
+  } catch (error) {
+    console.log('Error while deploying site');
     console.log(error);
     process.exit(1);
   }
 }
 
-function writeNewManifestVersion (current: string) {
+function writeNewManifestVersion(current: string) {
   const newREADME = `# d2-manifest-bot\ngithub action for checking for new d2 manifest\n\n# Current Manifest: ${current}`;
   writeFileSync('latest.json', `${JSON.stringify(current, null, 2)}\n`, 'utf8');
   writeFileSync('README.md', newREADME, 'utf8');
 }
 
-function deployWebsite (current: string) {
+function deployWebsite(current: string) {
   const buildMessage = `New manifest build - ${current}`;
 
   const url = process.env.NETLIFY_HOOK_URL
@@ -64,7 +64,7 @@ function deployWebsite (current: string) {
     query: {
       trigger_title: buildMessage,
     },
-    body: 'SKIP',
+    body: { data: 'skip' },
     method: 'POST',
   });
 }
